@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { client, urlFor } from "./lib/sanity"; // Importamos el conector
+import { client, urlFor } from "./lib/sanity"; // Asegúrate de que esta ruta sea correcta
 
 // --- 🎬 DATOS DEL HERO SLIDER (ESTÁTICOS) ---
 const HERO_SLIDES = [
@@ -10,7 +10,7 @@ const HERO_SLIDES = [
     titulo: "CONFORT REAL",
     subtitulo: "Nueva Colección 2025",
     desc: "Tecnología Seamless que se adapta a tu piel como si no llevaras nada.",
-    img: "https://images.pexels.com/photos/15980666/pexels-photo-15980666.jpeg?auto=compress&cs=tinysrgb&w=1600",
+    img: "https://plus.unsplash.com/premium_photo-1683121351249-a38b3ba40d68?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     boton: "Ver Confort",
     color: "rose"
   },
@@ -106,6 +106,9 @@ export default function Tienda() {
   // --- 🔌 CONEXIÓN CON SANITY ---
   const [productosReales, setProductosReales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // --- 🔢 NUEVO: ESTADO PARA PAGINACIÓN (CARGAR MÁS) ---
+  const [cantidadVisible, setCantidadVisible] = useState(8); 
 
   useEffect(() => {
     const fetchProductos = async () => {
@@ -249,7 +252,7 @@ export default function Tienda() {
         </div>
       </section>
 
-      {/* 6. LISTADO DE PRODUCTOS (CONECTADO A SANITY) */}
+      {/* 6. LISTADO DE PRODUCTOS (CONECTADO A SANITY + CARGAR MÁS) */}
       <main id="coleccion" className="mx-auto max-w-7xl px-4 md:px-6 pb-24">
         <div className="flex items-end justify-between mb-12 border-b border-gray-100 pb-6">
           <div>
@@ -264,50 +267,65 @@ export default function Tienda() {
             <p className="text-gray-500">Cargando tus prendas...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {productosReales.map((producto: any) => (
-              <div key={producto._id} className="group relative bg-white flex flex-col">
-                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-gray-100 shadow-md transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-2">
+          <>
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {/* AQUÍ ESTÁ EL CAMBIO: Slice corta la lista para mostrar solo los visibles */}
+              {productosReales.slice(0, cantidadVisible).map((producto: any) => (
+                <div key={producto._id} className="group relative bg-white flex flex-col">
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-gray-100 shadow-md transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-2">
+                    
+                    {/* ETIQUETAS DE SANITY */}
+                    {producto.etiqueta && (
+                      <span className={`absolute right-3 top-3 z-20 rounded-md px-2 py-1 text-[10px] font-bold text-white uppercase tracking-wide shadow-sm ${producto.etiqueta.includes('Oferta') ? 'bg-red-600 animate-pulse' : 'bg-black'}`}>
+                        {producto.etiqueta}
+                      </span>
+                    )}
+
+                    {/* IMAGEN DE SANITY */}
+                    {producto.imagen && (
+                      <img 
+                        src={urlFor(producto.imagen).width(600).url()} 
+                        alt={producto.nombre} 
+                        className="h-full w-full object-cover transition duration-700 group-hover:scale-110" 
+                      />
+                    )}
+
+                    <div className="absolute bottom-4 left-4 right-4 translate-y-full opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                      <button onClick={() => comprarPorWhatsApp(producto)} className="w-full rounded-xl bg-white/90 backdrop-blur-md py-3 text-sm font-bold text-black shadow-lg hover:bg-black hover:text-white transition-colors flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5z"/></svg>
+                        Lo quiero ya
+                      </button>
+                    </div>
+                  </div>
                   
-                  {/* ETIQUETAS DE SANITY */}
-                  {producto.etiqueta && (
-                    <span className={`absolute right-3 top-3 z-20 rounded-md px-2 py-1 text-[10px] font-bold text-white uppercase tracking-wide shadow-sm ${producto.etiqueta.includes('Oferta') ? 'bg-red-600 animate-pulse' : 'bg-black'}`}>
-                      {producto.etiqueta}
-                    </span>
-                  )}
-
-                  {/* IMAGEN DE SANITY */}
-                  {producto.imagen && (
-                    <img 
-                      src={urlFor(producto.imagen).width(600).url()} 
-                      alt={producto.nombre} 
-                      className="h-full w-full object-cover transition duration-700 group-hover:scale-110" 
-                    />
-                  )}
-
-                  <div className="absolute bottom-4 left-4 right-4 translate-y-full opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                     <button onClick={() => comprarPorWhatsApp(producto)} className="w-full rounded-xl bg-white/90 backdrop-blur-md py-3 text-sm font-bold text-black shadow-lg hover:bg-black hover:text-white transition-colors flex items-center justify-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5z"/></svg>
-                      Lo quiero ya
-                    </button>
+                  <div className="mt-5 px-1 flex-1 flex flex-col">
+                    <div className="flex justify-between items-center mb-1">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{producto.categoria}</p>
+                      {/* Estrellas decorativas */}
+                      <div className="flex items-center gap-1 text-yellow-400 text-xs">★ <span className="text-gray-500 font-medium ml-1">5.0</span></div>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 leading-tight group-hover:text-rose-600 transition-colors cursor-pointer">{producto.nombre}</h3>
+                    <div className="mt-2 flex items-center gap-3">
+                      <span className="text-2xl font-black text-gray-900">S/ {producto.precio}</span>
+                      {producto.antes && <span className="text-sm text-gray-400 line-through">S/ {producto.antes}</span>}
+                    </div>
                   </div>
                 </div>
-                
-                <div className="mt-5 px-1 flex-1 flex flex-col">
-                  <div className="flex justify-between items-center mb-1">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{producto.categoria}</p>
-                    {/* Estrellas decorativas (fijas por ahora, hasta que las agreguemos a Sanity) */}
-                    <div className="flex items-center gap-1 text-yellow-400 text-xs">★ <span className="text-gray-500 font-medium ml-1">5.0</span></div>
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 leading-tight group-hover:text-rose-600 transition-colors cursor-pointer">{producto.nombre}</h3>
-                  <div className="mt-2 flex items-center gap-3">
-                    <span className="text-2xl font-black text-gray-900">S/ {producto.precio}</span>
-                    {producto.antes && <span className="text-sm text-gray-400 line-through">S/ {producto.antes}</span>}
-                  </div>
-                </div>
+              ))}
+            </div>
+
+            {/* BOTÓN CARGAR MÁS (Solo aparece si hay productos ocultos) */}
+            {cantidadVisible < productosReales.length && (
+              <div className="mt-12 text-center">
+                <button 
+                  onClick={() => setCantidadVisible(cantidadVisible + 8)}
+                  className="px-8 py-3 bg-white border border-gray-300 text-gray-900 font-bold rounded-full hover:bg-black hover:text-white transition-colors shadow-sm uppercase tracking-wide text-xs"
+                >
+                  Cargar más productos (+8)
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </main>
 
