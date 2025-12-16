@@ -19,7 +19,7 @@ const HERO_SLIDES = [
     titulo: "ENCANTOS DE ENCAJE",
     subtitulo: "Línea Seduction",
     desc: "Detalles florales y transparencias que resaltan tu belleza natural.",
-    img: "https://images.pexels.com/photos/3756041/pexels-photo-3756041.jpeg?auto=compress&cs=tinysrgb&w=1600",
+    img: "https://plus.unsplash.com/premium_photo-1661608920421-dd988eb5d9e0?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     boton: "Ver Lencería",
     color: "purple"
   },
@@ -28,7 +28,7 @@ const HERO_SLIDES = [
     titulo: "CONTROL TOTAL",
     subtitulo: "Fajas & Body",
     desc: "Define tu silueta al instante sin sacrificar la comodidad.",
-    img: "https://images.pexels.com/photos/2711018/pexels-photo-2711018.jpeg?auto=compress&cs=tinysrgb&w=1600",
+    img: "https://images.unsplash.com/photo-1604703552572-65664ecfc3a6?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     boton: "Ver Fajas",
     color: "emerald"
   }
