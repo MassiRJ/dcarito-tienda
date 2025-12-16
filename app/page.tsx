@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { client, urlFor } from "./lib/sanity"; // Asegúrate de que esta ruta sea correcta
+import Link from "next/link"; // 👈 IMPORTANTE: Esto permite navegar entre páginas
+import { client, urlFor } from "./lib/sanity"; 
 
 // --- 🎬 DATOS DEL HERO SLIDER (ESTÁTICOS) ---
 const HERO_SLIDES = [
@@ -34,11 +35,13 @@ const HERO_SLIDES = [
   }
 ];
 
-// --- 📂 DATOS DE CATEGORÍAS (BENTO GRID) ---
+// --- 📂 DATOS DE CATEGORÍAS (CON LINKS) ---
 const CATEGORIAS = [
   { 
     id: 1,
     nombre: "Sexy & Encaje", 
+    // OJO: Este link debe coincidir con la categoría exacta en Sanity
+    link: "/categoria/Brasieres", 
     subtitulo: "Atrévete a lucir",
     img: "https://images.unsplash.com/photo-1568441556126-f36ae0900180?q=80&w=1468&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     spanCol: "md:col-span-2", 
@@ -47,6 +50,7 @@ const CATEGORIAS = [
   { 
     id: 2,
     nombre: "Fajas Control", 
+    link: "/categoria/Fajas",
     subtitulo: "Silueta perfecta",
     img: "https://leonisa.pe/cdn/shop/files/012901_700_1200X1500_o.k_1_caac8c95-d842-4e8a-b72f-c23cc46c8995_900x.jpg?v=1762958266",
     spanCol: "md:col-span-1",
@@ -55,6 +59,7 @@ const CATEGORIAS = [
   { 
     id: 3,
     nombre: "Pijamas Soft", 
+    link: "/categoria/Pijamas",
     subtitulo: "Descanso total",
     img: "https://bombonrojo.com/cdn/shop/files/PIJ-SILVIE.png?v=1731946696",
     spanCol: "md:col-span-1",
@@ -63,6 +68,7 @@ const CATEGORIAS = [
   { 
     id: 4,
     nombre: "Packs Diarios", 
+    link: "/categoria/Calzones", // Ajusta si en Sanity usas "Calzones" o "Packs"
     subtitulo: "Algodón Premium",
     img: "https://images.pexels.com/photos/16303272/pexels-photo-16303272.jpeg?auto=compress&cs=tinysrgb&w=600",
     spanCol: "md:col-span-1",
@@ -107,7 +113,7 @@ export default function Tienda() {
   const [productosReales, setProductosReales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // --- 🔢 NUEVO: ESTADO PARA PAGINACIÓN (CARGAR MÁS) ---
+  // --- 🔢 ESTADO PARA PAGINACIÓN (CARGAR MÁS) ---
   const [cantidadVisible, setCantidadVisible] = useState(8); 
 
   useEffect(() => {
@@ -229,7 +235,7 @@ export default function Tienda() {
         </div>
       </section>
 
-      {/* 5. CATEGORÍAS (BENTO GRID) */}
+      {/* 5. CATEGORÍAS (BENTO GRID) - AHORA CON LINKS */}
       <section id="categorias" className="py-20 mx-auto max-w-7xl px-4">
         <div className="flex flex-col md:flex-row justify-between items-end mb-10 px-2">
           <div><span className="text-rose-600 font-bold tracking-widest text-xs uppercase">Explora</span><h2 className="text-3xl md:text-5xl font-black text-gray-900 mt-2">Nuestras Colecciones</h2></div>
@@ -237,7 +243,11 @@ export default function Tienda() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 h-auto md:h-[600px]">
           {CATEGORIAS.map((cat) => (
-            <div key={cat.id} className={`group relative overflow-hidden rounded-3xl cursor-pointer ${cat.spanCol} ${cat.spanRow}`}>
+            <Link 
+              href={cat.link} 
+              key={cat.id} 
+              className={`group relative overflow-hidden rounded-3xl cursor-pointer ${cat.spanCol} ${cat.spanRow}`}
+            >
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500 z-10"></div>
               <img src={cat.img} className="h-full w-full object-cover transition duration-[1.5s] ease-out group-hover:scale-110" alt={cat.nombre} />
               <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 md:p-8">
@@ -247,7 +257,7 @@ export default function Tienda() {
                   <div className="h-10 w-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white opacity-0 -translate-x-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-x-0 group-hover:bg-white group-hover:text-black">➜</div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
@@ -269,7 +279,7 @@ export default function Tienda() {
         ) : (
           <>
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-              {/* AQUÍ ESTÁ EL CAMBIO: Slice corta la lista para mostrar solo los visibles */}
+              {/* SLICE para paginación */}
               {productosReales.slice(0, cantidadVisible).map((producto: any) => (
                 <div key={producto._id} className="group relative bg-white flex flex-col">
                   <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-gray-100 shadow-md transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-2">

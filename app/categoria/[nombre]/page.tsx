@@ -1,0 +1,111 @@
+'use client';
+
+import { useState, useEffect } from "react";
+import { client, urlFor } from "../../lib/sanity"; // Retrocedemos 2 carpetas para encontrar lib
+import Link from "next/link";
+import { useParams } from "next/navigation";
+
+export default function PaginaCategoria() {
+  const params = useParams();
+  // Decodificamos el nombre (por si la URL dice "Sexy%20Encaje" lo convierte a "Sexy Encaje")
+  const categoriaNombre = decodeURIComponent(params.nombre as string);
+
+  const [productos, setProductos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProductos = async () => {
+      try {
+        // 🧠 AQUÍ ESTÁ LA MAGIA: Filtramos por la categoría que viene en la URL
+        // Usamos 'match' para que coincida aunque sea minúscula/mayúscula
+        const query = `*[_type == "producto" && categoria == "${categoriaNombre}"] | order(_createdAt desc)`;
+        const data = await client.fetch(query);
+        setProductos(data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error:", error);
+        setLoading(false);
+      }
+    };
+
+    if (categoriaNombre) {
+      fetchProductos();
+    }
+  }, [categoriaNombre]);
+
+  return (
+    <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-rose-100">
+      
+      {/* NAVBAR SIMPLE */}
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 py-4">
+        <div className="mx-auto max-w-7xl px-6 flex items-center justify-between">
+          <Link href="/" className="text-2xl font-black tracking-tighter hover:text-rose-600 transition">
+            D'Carito<span className="text-rose-600">.PE</span>
+          </Link>
+          <Link href="/" className="text-sm font-bold flex items-center gap-2 hover:underline">
+            ← Volver al Inicio
+          </Link>
+        </div>
+      </nav>
+
+      <main className="mx-auto max-w-7xl px-6 py-12">
+        
+        {/* ENCABEZADO DE CATEGORÍA */}
+        <div className="text-center mb-16">
+          <span className="text-rose-600 font-bold tracking-widest text-xs uppercase">Colección Exclusiva</span>
+          <h1 className="text-4xl md:text-6xl font-black text-gray-900 mt-2 uppercase">{categoriaNombre}</h1>
+          <p className="text-gray-500 mt-4">Explora nuestros diseños seleccionados para ti.</p>
+        </div>
+
+        {/* LISTA DE PRODUCTOS */}
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p>Buscando prendas...</p>
+          </div>
+        ) : productos.length === 0 ? (
+          <div className="text-center py-20 bg-gray-50 rounded-3xl">
+            <p className="text-2xl mb-4">😢</p>
+            <h3 className="text-xl font-bold">No encontramos productos en esta categoría</h3>
+            <p className="text-gray-500 mt-2">Prueba volviendo al inicio para ver todo.</p>
+            <Link href="/" className="mt-6 inline-block bg-black text-white px-6 py-3 rounded-full font-bold text-sm">
+              Ver todo el catálogo
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {productos.map((producto: any) => (
+              <div key={producto._id} className="group relative bg-white flex flex-col">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-gray-100 shadow-md">
+                   {producto.imagen && (
+                    <img 
+                      src={urlFor(producto.imagen).width(600).url()} 
+                      alt={producto.nombre} 
+                      className="h-full w-full object-cover transition duration-700 group-hover:scale-110" 
+                    />
+                  )}
+                  {/* Botón flotante simple */}
+                  <div className="absolute bottom-4 left-4 right-4 translate-y-full opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                     <button className="w-full rounded-xl bg-white/90 backdrop-blur-md py-3 text-sm font-bold text-black shadow-lg">
+                      Ver detalle
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="mt-4">
+                  <h3 className="text-lg font-bold text-gray-900 group-hover:text-rose-600 transition-colors">{producto.nombre}</h3>
+                  <p className="text-xl font-black text-gray-900 mt-1">S/ {producto.precio}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+
+       {/* FOOTER SIMPLE */}
+       <footer className="bg-black text-white py-8 text-center text-xs mt-20">
+          © {new Date().getFullYear()} D'Carito Perú.
+       </footer>
+    </div>
+  );
+}
