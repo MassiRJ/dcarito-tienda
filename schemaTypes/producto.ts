@@ -10,10 +10,31 @@ export default defineType({
       title: 'Nombre del Producto',
       type: 'string',
     }),
+    // --- CAMPO NUEVO: SLUG (Para el link) ---
+    defineField({
+      name: 'slug',
+      title: 'Link Personalizado (Slug)',
+      type: 'slug',
+      options: {
+        source: 'nombre', // Se genera automático basado en el nombre
+        maxLength: 96,
+      },
+    }),
     defineField({
       name: 'precio',
       title: 'Precio (S/)',
       type: 'number',
+    }),
+    defineField({
+      name: 'antes',
+      title: 'Precio Antes (Opcional)',
+      type: 'number',
+    }),
+    // --- CAMPO NUEVO: DESCRIPCIÓN ---
+    defineField({
+      name: 'descripcion',
+      title: 'Descripción Detallada',
+      type: 'text', // Texto largo
     }),
     defineField({
       name: 'categoria',

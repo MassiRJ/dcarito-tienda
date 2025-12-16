@@ -165,7 +165,7 @@ export default function Tienda() {
       <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 shadow-sm backdrop-blur-md py-2' : 'bg-white py-4'}`}>
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 md:px-6">
           <div className="text-xl md:text-2xl font-black tracking-tighter cursor-pointer">
-            D'Carito<span className="text-rose-600">.PE</span>
+            D'Carito<span className="text-rose-600">.pe</span>
           </div>
           <div className="hidden space-x-8 text-sm font-medium md:flex text-gray-600">
             <a href="#coleccion" className="hover:text-rose-600 transition hover:scale-105 transform">Colección</a>
@@ -222,7 +222,7 @@ export default function Tienda() {
         </div>
       </div>
 
-      {/* 4. OFERTAS FLASH */}
+      {/* 4. OFERTAS FLASH 
       <section id="ofertas" className="bg-rose-600 py-4 overflow-hidden relative">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 2px, transparent 2.5px)', backgroundSize: '20px 20px' }}></div>
         <div className="mx-auto max-w-7xl px-4 flex flex-col md:flex-row items-center justify-between gap-4 relative z-10 text-white">
@@ -234,7 +234,7 @@ export default function Tienda() {
           </div>
           <button className="bg-white text-rose-600 px-6 py-2 rounded-full font-bold text-sm hover:bg-black hover:text-white transition-colors shadow-lg uppercase tracking-wide hidden md:block">Ver Descuentos</button>
         </div>
-      </section>
+      </section> */}
 
       {/* 5. CATEGORÍAS (BENTO GRID - 2 COLUMNAS EN MÓVIL) */}
       <section id="categorias" className="py-20 mx-auto max-w-7xl px-4">
