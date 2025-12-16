@@ -40,7 +40,7 @@ const CATEGORIAS = [
     id: 1,
     nombre: "Sexy & Encaje", 
     subtitulo: "Atrévete a lucir",
-    img: "https://images.pexels.com/photos/3756041/pexels-photo-3756041.jpeg?auto=compress&cs=tinysrgb&w=600",
+    img: "https://images.unsplash.com/photo-1568441556126-f36ae0900180?q=80&w=1468&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     spanCol: "md:col-span-2", 
     spanRow: "md:row-span-2"  
   },
@@ -48,7 +48,7 @@ const CATEGORIAS = [
     id: 2,
     nombre: "Fajas Control", 
     subtitulo: "Silueta perfecta",
-    img: "https://images.pexels.com/photos/2711018/pexels-photo-2711018.jpeg?auto=compress&cs=tinysrgb&w=600",
+    img: "https://leonisa.pe/cdn/shop/files/012901_700_1200X1500_o.k_1_caac8c95-d842-4e8a-b72f-c23cc46c8995_900x.jpg?v=1762958266",
     spanCol: "md:col-span-1",
     spanRow: "md:row-span-1" 
   },
@@ -56,7 +56,7 @@ const CATEGORIAS = [
     id: 3,
     nombre: "Pijamas Soft", 
     subtitulo: "Descanso total",
-    img: "https://images.pexels.com/photos/4937222/pexels-photo-4937222.jpeg?auto=compress&cs=tinysrgb&w=600",
+    img: "https://bombonrojo.com/cdn/shop/files/PIJ-SILVIE.png?v=1731946696",
     spanCol: "md:col-span-1",
     spanRow: "md:row-span-2" 
   },
