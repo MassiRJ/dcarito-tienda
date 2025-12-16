@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import Link from "next/link"; // 👈 IMPORTANTE: Esto permite navegar entre páginas
+import Link from "next/link"; 
 import { client, urlFor } from "./lib/sanity"; 
 
-// --- 🎬 DATOS DEL HERO SLIDER (ESTÁTICOS) ---
+// --- 🎬 DATOS DEL HERO SLIDER ---
 const HERO_SLIDES = [
   {
     id: 1,
@@ -35,17 +35,18 @@ const HERO_SLIDES = [
   }
 ];
 
-// --- 📂 DATOS DE CATEGORÍAS (CON LINKS) ---
+// --- 📂 DATOS DE CATEGORÍAS (OPTIMIZADO PARA MÓVIL) ---
 const CATEGORIAS = [
   { 
     id: 1,
     nombre: "Sexy & Encaje", 
-    // OJO: Este link debe coincidir con la categoría exacta en Sanity
     link: "/categoria/Brasieres", 
     subtitulo: "Atrévete a lucir",
     img: "https://images.unsplash.com/photo-1568441556126-f36ae0900180?q=80&w=1468&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    spanCol: "md:col-span-2", 
-    spanRow: "md:row-span-2"  
+    // EN MÓVIL: Ocupa las 2 columnas (full width) para destacar
+    // EN PC: Ocupa 2 columnas
+    spanCol: "col-span-2 md:col-span-2", 
+    spanRow: "row-span-1 md:row-span-2"  
   },
   { 
     id: 2,
@@ -53,8 +54,9 @@ const CATEGORIAS = [
     link: "/categoria/Fajas",
     subtitulo: "Silueta perfecta",
     img: "https://leonisa.pe/cdn/shop/files/012901_700_1200X1500_o.k_1_caac8c95-d842-4e8a-b72f-c23cc46c8995_900x.jpg?v=1762958266",
-    spanCol: "md:col-span-1",
-    spanRow: "md:row-span-1" 
+    // EN MÓVIL: Ocupa 1 columna (mitad)
+    spanCol: "col-span-1 md:col-span-1",
+    spanRow: "row-span-1 md:row-span-1" 
   },
   { 
     id: 3,
@@ -62,17 +64,17 @@ const CATEGORIAS = [
     link: "/categoria/Pijamas",
     subtitulo: "Descanso total",
     img: "https://bombonrojo.com/cdn/shop/files/PIJ-SILVIE.png?v=1731946696",
-    spanCol: "md:col-span-1",
-    spanRow: "md:row-span-2" 
+    spanCol: "col-span-1 md:col-span-1",
+    spanRow: "row-span-1 md:row-span-2" 
   },
   { 
     id: 4,
     nombre: "Packs Diarios", 
-    link: "/categoria/Calzones", // Ajusta si en Sanity usas "Calzones" o "Packs"
+    link: "/categoria/Calzones",
     subtitulo: "Algodón Premium",
     img: "https://images.pexels.com/photos/16303272/pexels-photo-16303272.jpeg?auto=compress&cs=tinysrgb&w=600",
-    spanCol: "md:col-span-1",
-    spanRow: "md:row-span-1"
+    spanCol: "col-span-1 md:col-span-1",
+    spanRow: "row-span-1 md:row-span-1"
   }
 ];
 
@@ -113,7 +115,7 @@ export default function Tienda() {
   const [productosReales, setProductosReales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // --- 🔢 ESTADO PARA PAGINACIÓN (CARGAR MÁS) ---
+  // --- 🔢 ESTADO PARA PAGINACIÓN ---
   const [cantidadVisible, setCantidadVisible] = useState(8); 
 
   useEffect(() => {
@@ -189,7 +191,7 @@ export default function Tienda() {
         )}
       </nav>
 
-      {/* 3. HERO SLIDER EDITORIAL */}
+      {/* 3. HERO SLIDER */}
       <div className="relative h-[85vh] w-full bg-gray-900 overflow-hidden">
         {HERO_SLIDES.map((slide, index) => (
           <div key={slide.id} className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
@@ -210,7 +212,6 @@ export default function Tienda() {
             </div>
           </div>
         </div>
-        {/* Navegación Lateral */}
         <div className="absolute bottom-8 right-6 md:top-1/2 md:-translate-y-1/2 md:right-12 z-30 flex md:flex-col gap-4">
           {HERO_SLIDES.map((slide, index) => (
             <button key={slide.id} onClick={() => setCurrentSlide(index)} className={`group flex items-center gap-3 transition-all duration-300 ${index === currentSlide ? 'opacity-100 translate-x-0' : 'opacity-50 md:translate-x-4 hover:opacity-100'}`}>
@@ -221,7 +222,7 @@ export default function Tienda() {
         </div>
       </div>
 
-      {/* 4. SECCIÓN OFERTAS FLASH */}
+      {/* 4. OFERTAS FLASH */}
       <section id="ofertas" className="bg-rose-600 py-4 overflow-hidden relative">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 2px, transparent 2.5px)', backgroundSize: '20px 20px' }}></div>
         <div className="mx-auto max-w-7xl px-4 flex flex-col md:flex-row items-center justify-between gap-4 relative z-10 text-white">
@@ -235,13 +236,14 @@ export default function Tienda() {
         </div>
       </section>
 
-      {/* 5. CATEGORÍAS (BENTO GRID) - AHORA CON LINKS */}
+      {/* 5. CATEGORÍAS (BENTO GRID - 2 COLUMNAS EN MÓVIL) */}
       <section id="categorias" className="py-20 mx-auto max-w-7xl px-4">
         <div className="flex flex-col md:flex-row justify-between items-end mb-10 px-2">
           <div><span className="text-rose-600 font-bold tracking-widest text-xs uppercase">Explora</span><h2 className="text-3xl md:text-5xl font-black text-gray-900 mt-2">Nuestras Colecciones</h2></div>
           <p className="text-gray-500 max-w-xs text-sm mt-4 md:mt-0">Diseños pensados para cada momento de tu día.</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 h-auto md:h-[600px]">
+        {/* CAMBIO: grid-cols-2 en vez de 1 para móvil */}
+        <div className="grid grid-cols-2 md:grid-cols-4 md:grid-rows-2 gap-3 md:gap-4 h-auto md:h-[600px]">
           {CATEGORIAS.map((cat) => (
             <Link 
               href={cat.link} 
@@ -250,11 +252,11 @@ export default function Tienda() {
             >
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500 z-10"></div>
               <img src={cat.img} className="h-full w-full object-cover transition duration-[1.5s] ease-out group-hover:scale-110" alt={cat.nombre} />
-              <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 md:p-8">
-                <span className="translate-y-4 opacity-0 text-xs font-bold text-rose-300 uppercase tracking-widest transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">{cat.subtitulo}</span>
-                <div className="flex items-center justify-between mt-2">
-                  <h3 className="text-2xl md:text-3xl font-black text-white leading-none">{cat.nombre}</h3>
-                  <div className="h-10 w-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white opacity-0 -translate-x-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-x-0 group-hover:bg-white group-hover:text-black">➜</div>
+              <div className="absolute inset-0 z-20 flex flex-col justify-end p-4 md:p-8">
+                <span className="translate-y-4 opacity-0 text-[10px] md:text-xs font-bold text-rose-300 uppercase tracking-widest transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">{cat.subtitulo}</span>
+                <div className="flex items-center justify-between mt-1 md:mt-2">
+                  <h3 className="text-lg md:text-3xl font-black text-white leading-none">{cat.nombre}</h3>
+                  <div className="hidden md:flex h-10 w-10 rounded-full bg-white/20 backdrop-blur items-center justify-center text-white opacity-0 -translate-x-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-x-0 group-hover:bg-white group-hover:text-black">➜</div>
                 </div>
               </div>
             </Link>
@@ -262,12 +264,12 @@ export default function Tienda() {
         </div>
       </section>
 
-      {/* 6. LISTADO DE PRODUCTOS (CONECTADO A SANITY + CARGAR MÁS) */}
+      {/* 6. LISTADO DE PRODUCTOS (2 COLUMNAS EN MÓVIL) */}
       <main id="coleccion" className="mx-auto max-w-7xl px-4 md:px-6 pb-24">
-        <div className="flex items-end justify-between mb-12 border-b border-gray-100 pb-6">
+        <div className="flex items-end justify-between mb-8 md:mb-12 border-b border-gray-100 pb-6">
           <div>
             <div className="flex items-center gap-2 mb-2"><span className="animate-pulse h-3 w-3 rounded-full bg-rose-600"></span><span className="text-rose-600 font-bold uppercase tracking-widest text-xs">Catálogo Oficial</span></div>
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900">Lo Más Deseado</h2>
+            <h2 className="text-3xl md:text-5xl font-black text-gray-900">Lo Más Deseado</h2>
           </div>
         </div>
         
@@ -278,20 +280,18 @@ export default function Tienda() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-              {/* SLICE para paginación */}
+            {/* CAMBIO: grid-cols-2 gap-3 para móvil */}
+            <div className="grid grid-cols-2 gap-3 md:gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {productosReales.slice(0, cantidadVisible).map((producto: any) => (
                 <div key={producto._id} className="group relative bg-white flex flex-col">
-                  <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-gray-100 shadow-md transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-2">
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-xl md:rounded-2xl bg-gray-100 shadow-sm md:shadow-md transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-2">
                     
-                    {/* ETIQUETAS DE SANITY */}
                     {producto.etiqueta && (
-                      <span className={`absolute right-3 top-3 z-20 rounded-md px-2 py-1 text-[10px] font-bold text-white uppercase tracking-wide shadow-sm ${producto.etiqueta.includes('Oferta') ? 'bg-red-600 animate-pulse' : 'bg-black'}`}>
+                      <span className={`absolute right-2 top-2 z-20 rounded-md px-1.5 py-0.5 text-[8px] md:text-[10px] md:px-2 md:py-1 font-bold text-white uppercase tracking-wide shadow-sm ${producto.etiqueta.includes('Oferta') ? 'bg-red-600 animate-pulse' : 'bg-black'}`}>
                         {producto.etiqueta}
                       </span>
                     )}
 
-                    {/* IMAGEN DE SANITY */}
                     {producto.imagen && (
                       <img 
                         src={urlFor(producto.imagen).width(600).url()} 
@@ -300,7 +300,8 @@ export default function Tienda() {
                       />
                     )}
 
-                    <div className="absolute bottom-4 left-4 right-4 translate-y-full opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                    {/* Botón rápido - Solo visible en desktop hover */}
+                    <div className="hidden md:block absolute bottom-4 left-4 right-4 translate-y-full opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                       <button onClick={() => comprarPorWhatsApp(producto)} className="w-full rounded-xl bg-white/90 backdrop-blur-md py-3 text-sm font-bold text-black shadow-lg hover:bg-black hover:text-white transition-colors flex items-center justify-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5z"/></svg>
                         Lo quiero ya
@@ -308,23 +309,27 @@ export default function Tienda() {
                     </div>
                   </div>
                   
-                  <div className="mt-5 px-1 flex-1 flex flex-col">
+                  <div className="mt-3 md:mt-5 px-1 flex-1 flex flex-col">
                     <div className="flex justify-between items-center mb-1">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{producto.categoria}</p>
-                      {/* Estrellas decorativas */}
-                      <div className="flex items-center gap-1 text-yellow-400 text-xs">★ <span className="text-gray-500 font-medium ml-1">5.0</span></div>
+                      <p className="text-[8px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{producto.categoria}</p>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 leading-tight group-hover:text-rose-600 transition-colors cursor-pointer">{producto.nombre}</h3>
-                    <div className="mt-2 flex items-center gap-3">
-                      <span className="text-2xl font-black text-gray-900">S/ {producto.precio}</span>
-                      {producto.antes && <span className="text-sm text-gray-400 line-through">S/ {producto.antes}</span>}
+                    {/* Título más pequeño en móvil */}
+                    <h3 onClick={() => comprarPorWhatsApp(producto)} className="text-sm md:text-lg font-bold text-gray-900 leading-tight group-hover:text-rose-600 transition-colors cursor-pointer line-clamp-2">{producto.nombre}</h3>
+                    
+                    <div className="mt-1 md:mt-2 flex items-center gap-2 md:gap-3 flex-wrap">
+                      <span className="text-lg md:text-2xl font-black text-gray-900">S/ {producto.precio}</span>
+                      {producto.antes && <span className="text-xs md:text-sm text-gray-400 line-through">S/ {producto.antes}</span>}
                     </div>
+
+                    {/* Botón comprar móvil */}
+                    <button onClick={() => comprarPorWhatsApp(producto)} className="md:hidden mt-2 w-full bg-black text-white text-xs font-bold py-2 rounded-lg">
+                      Comprar
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* BOTÓN CARGAR MÁS (Solo aparece si hay productos ocultos) */}
             {cantidadVisible < productosReales.length && (
               <div className="mt-12 text-center">
                 <button 
@@ -339,7 +344,7 @@ export default function Tienda() {
         )}
       </main>
 
-      {/* 7. TESTIMONIOS (SOCIAL PROOF) */}
+      {/* 7. TESTIMONIOS */}
       <section className="bg-rose-50 py-20">
         <div className="mx-auto max-w-7xl px-6">
           <div className="text-center mb-16">
@@ -362,13 +367,13 @@ export default function Tienda() {
         </div>
       </section>
 
-      {/* 8. FOOTER PREMIUM */}
+      {/* 8. FOOTER */}
       <footer className="bg-black text-gray-300 pt-20 pb-10 text-sm">
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 border-b border-gray-800 pb-12">
             <div className="md:col-span-4">
               <h4 className="text-white font-black text-3xl mb-6 tracking-tighter">D'Carito<span className="text-rose-600">.PE</span></h4>
-              <p className="mb-6 text-gray-400 leading-relaxed">Redefiniendo la lencería en Perú. Diseños que abrazan tu cuerpo, elevan tu confianza y te acompañan en cada momento especial.</p>
+              <p className="mb-6 text-gray-400 leading-relaxed">Redefiniendo la lencería en Perú.</p>
               <div className="flex gap-4">
                 <a href="#" className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-900 text-white hover:bg-rose-600 border border-gray-800">📷</a>
                 <a href="#" className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-900 text-white hover:bg-blue-600 border border-gray-800">👍</a>
@@ -395,7 +400,7 @@ export default function Tienda() {
         </div>
       </footer>
 
-      {/* 9. BOTÓN WHATSAPP OFICIAL */}
+      {/* 9. BOTÓN WHATSAPP */}
       <a href={`https://wa.me/${NUMERO_WHATSAPP}?text=Hola%20D'Carito,%20consulta.`} target="_blank" className="fixed bottom-6 right-6 z-50 transition-transform hover:scale-110 active:scale-95 flex items-center justify-center">
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="h-16 w-16 drop-shadow-2xl" />
       </a>
