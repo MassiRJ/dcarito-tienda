@@ -62,16 +62,36 @@ const NAV_LINKS = [
 const TABS_FILTROS = ["Todos", "Brasieres", "Calzones", "Fajas", "Pijamas"];
 const NUMERO_WHATSAPP = "51999999999"; 
 
-// Banner por defecto (por si no carga Sanity)
-const BANNER_DEFAULT = [{
-  _id: "default",
-  titulo: "BIENVENIDA",
-  subtitulo: "Moda Íntima",
-  descripcion: "Explora nuestra nueva colección diseñada para ti.",
-  imagen: null, // Se usará un color de fondo si es null
-  boton: "Ver Tienda",
-  color: "rose"
-}];
+// --- 🔥 BANNERS ORIGINALES DE RESPALDO ---
+const BANNERS_BACKUP = [
+  {
+    _id: "backup-1",
+    titulo: "CONFORT REAL",
+    subtitulo: "Nueva Colección 2025",
+    descripcion: "Tecnología Seamless que se adapta a tu piel como si no llevaras nada.",
+    imgBackup: "https://plus.unsplash.com/premium_photo-1683121351249-a38b3ba40d68?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    boton: "Ver Confort",
+    color: "rose"
+  },
+  {
+    _id: "backup-2",
+    titulo: "ENCANTOS DE ENCAJE",
+    subtitulo: "Línea Seduction",
+    descripcion: "Detalles florales y transparencias que resaltan tu belleza natural.",
+    imgBackup: "https://plus.unsplash.com/premium_photo-1661608920421-dd988eb5d9e0?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    boton: "Ver Lencería",
+    color: "purple"
+  },
+  {
+    _id: "backup-3",
+    titulo: "CONTROL TOTAL",
+    subtitulo: "Fajas & Body",
+    descripcion: "Define tu silueta al instante sin sacrificar la comodidad.",
+    imgBackup: "https://images.unsplash.com/photo-1604703552572-65664ecfc3a6?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    boton: "Ver Fajas",
+    color: "emerald"
+  }
+];
 
 export default function Tienda() {
   const [carrito, setCarrito] = useState<number>(0);
@@ -82,25 +102,22 @@ export default function Tienda() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeSection, setActiveSection] = useState("");
   
-  const [banners, setBanners] = useState<any[]>(BANNER_DEFAULT); // Inicia con default
+  const [banners, setBanners] = useState<any[]>(BANNERS_BACKUP); 
   const [productosReales, setProductosReales] = useState<any[]>([]);
   const [productosFiltrados, setProductosFiltrados] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtroActivo, setFiltroActivo] = useState("Todos");
   const [busqueda, setBusqueda] = useState(""); 
 
-  // --- CARGAR DATOS DE SANITY (BANNERS Y PRODUCTOS) ---
+  // --- CARGAR DATOS DE SANITY ---
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. Cargar Banners
         const bannerQuery = `*[_type == "banner"]`;
         const bannerData = await client.fetch(bannerQuery);
-        if (bannerData.length > 0) {
-          setBanners(bannerData);
-        }
+        // Combinamos Sanity + Backup
+        setBanners([...bannerData, ...BANNERS_BACKUP]);
 
-        // 2. Cargar Productos
         const productQuery = `*[_type == "producto"] | order(_createdAt desc)`;
         const productData = await client.fetch(productQuery);
         setProductosReales(productData);
@@ -151,7 +168,7 @@ export default function Tienda() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Rotación del Slider (Solo si hay más de 1 banner)
+  // Rotación del Slider
   useEffect(() => {
     if (banners.length <= 1) return;
     const interval = setInterval(() => {
@@ -167,6 +184,16 @@ export default function Tienda() {
   };
 
   const MARQUEE_TEXT = "🚚 ENVÍOS GRATIS A TODO EL PERÚ • 💳 ACEPTAMOS YAPE Y PLIN • 🎁 REGALO POR COMPRAS > S/199 • ⚡ ENVÍO EXPRESS EN LIMA • ";
+
+  // --- LÓGICA HÍBRIDA PARA IMAGEN ---
+  const getBannerImage = (slide: any) => {
+    if (slide.imagen) {
+      return urlFor(slide.imagen).url(); // Imagen de Sanity
+    } else if (slide.imgBackup) {
+      return slide.imgBackup; // Imagen de Backup
+    }
+    return null; 
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900 selection:bg-rose-100 selection:text-rose-900">
@@ -196,7 +223,7 @@ export default function Tienda() {
       <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 shadow-sm backdrop-blur-md py-2' : 'bg-white py-4'}`}>
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 md:px-6">
           <div className="text-xl md:text-2xl font-black tracking-tighter cursor-pointer" onClick={() => window.scrollTo(0,0)}>
-            D'Carito<span className="text-rose-600">.PE</span>
+            D'Carito<span className="text-rose-600">.pe</span>
           </div>
           <div className="hidden space-x-8 text-sm font-medium md:flex text-gray-600">
             {NAV_LINKS.map((item) => (
@@ -225,34 +252,38 @@ export default function Tienda() {
         )}
       </nav>
 
-      {/* 3. HERO SLIDER (DINÁMICO DESDE SANITY) */}
-      <div className="relative h-[85vh] w-full bg-gray-900 overflow-hidden">
-        {banners.map((slide, index) => (
-          <div key={slide._id} className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10"></div>
-            {slide.imagen ? (
-              <img src={urlFor(slide.imagen).url()} alt={slide.titulo} className={`h-full w-full object-cover object-top transition-transform duration-[5s] ${index === currentSlide ? 'scale-110' : 'scale-100'}`} />
-            ) : (
-              // Fondo de respaldo si no hay imagen
-              <div className="h-full w-full bg-gray-800"></div>
-            )}
-          </div>
-        ))}
+      {/* 3. HERO SLIDER (HÍBRIDO + OPTIMIZADO PARA MÓVIL) */}
+      {/* ⚠️ CAMBIO AQUÍ: h-[50vh] en móvil para reducir el zoom */}
+      <div className="relative h-[50vh] md:h-[85vh] w-full bg-gray-900 overflow-hidden">
+        {banners.map((slide, index) => {
+          const imgSrc = getBannerImage(slide);
+          return (
+            <div key={slide._id} className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
+              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10"></div>
+              {imgSrc ? (
+                // ⚠️ CAMBIO AQUÍ: object-center en lugar de object-top
+                <img src={imgSrc} alt={slide.titulo} className={`h-full w-full object-cover object-center transition-transform duration-[5s] ${index === currentSlide ? 'scale-110' : 'scale-100'}`} />
+              ) : (
+                <div className="h-full w-full bg-gray-800"></div>
+              )}
+            </div>
+          );
+        })}
         
         <div className="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-24">
           <div className="max-w-xl">
-            {/* Usamos key para reiniciar la animación cuando cambia el slide */}
             <div key={currentSlide} className="animate-in slide-in-from-bottom-10 fade-in duration-700">
               <span className={`inline-block px-3 py-1 mb-4 text-xs font-bold tracking-[0.2em] text-white uppercase border border-white/30 backdrop-blur-md rounded-full`}>
                 {banners[currentSlide]?.subtitulo || "Colección"}
               </span>
-              <h1 className="text-5xl md:text-8xl font-black text-white leading-[0.9] drop-shadow-2xl mb-6">
+              <h1 className="text-4xl md:text-8xl font-black text-white leading-[0.9] drop-shadow-2xl mb-6">
                 {banners[currentSlide]?.titulo || "D'CARITO"}
               </h1>
-              <p className="text-lg md:text-xl text-gray-200 font-light mb-8 max-w-md border-l-2 border-white/30 pl-4">
+              {/* Ocultamos descripción en móvil muy pequeño para que no tape la foto */}
+              <p className="text-sm md:text-xl text-gray-200 font-light mb-8 max-w-md border-l-2 border-white/30 pl-4 hidden md:block">
                 {banners[currentSlide]?.descripcion}
               </p>
-              <button className={`group relative px-8 py-4 bg-white text-black font-bold rounded-full overflow-hidden transition-transform hover:scale-105 active:scale-95`}>
+              <button className={`group relative px-6 py-3 md:px-8 md:py-4 bg-white text-black font-bold rounded-full overflow-hidden transition-transform hover:scale-105 active:scale-95 text-xs md:text-base`}>
                 <span className="relative z-10 group-hover:text-white transition-colors duration-300">
                   {banners[currentSlide]?.boton || "Ver más"} ➔
                 </span>
@@ -262,15 +293,15 @@ export default function Tienda() {
           </div>
         </div>
 
-        {/* Navegación Lateral (Solo si hay más de 1 slide) */}
+        {/* Navegación Lateral */}
         {banners.length > 1 && (
-          <div className="absolute bottom-8 right-6 md:top-1/2 md:-translate-y-1/2 md:right-12 z-30 flex md:flex-col gap-4">
+          <div className="absolute bottom-4 right-4 md:bottom-8 md:right-6 md:top-1/2 md:-translate-y-1/2 md:right-12 z-30 flex md:flex-col gap-4">
             {banners.map((slide, index) => (
               <button key={slide._id} onClick={() => setCurrentSlide(index)} className={`group flex items-center gap-3 transition-all duration-300 ${index === currentSlide ? 'opacity-100 translate-x-0' : 'opacity-50 md:translate-x-4 hover:opacity-100'}`}>
                 <span className={`hidden md:block text-sm font-bold tracking-widest text-white uppercase ${index === currentSlide ? 'border-b border-white' : ''}`}>
                   0{index + 1} - {slide.titulo?.split(" ")[0]}
                 </span>
-                <div className={`h-1 md:h-0.5 w-12 md:w-8 transition-all duration-500 ${index === currentSlide ? 'bg-white scale-x-100' : 'bg-gray-500 scale-x-75 group-hover:bg-gray-300'}`}></div>
+                <div className={`h-1 w-8 md:h-0.5 md:w-8 transition-all duration-500 ${index === currentSlide ? 'bg-white scale-x-100' : 'bg-gray-500 scale-x-75 group-hover:bg-gray-300'}`}></div>
               </button>
             ))}
           </div>
