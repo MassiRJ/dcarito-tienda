@@ -52,9 +52,8 @@ const TESTIMONIOS = [
 ];
 
 const NAV_LINKS = [
-  
-  { name: "Categorías", href: "#categorias" },
   { name: "Catálogo", href: "#coleccion" },
+  { name: "Categorías", href: "#categorias" },
   { name: "Clientes", href: "#testimonios" },
   { name: "Contacto", href: "#contacto" },
 ];
@@ -94,14 +93,16 @@ const BANNERS_BACKUP = [
 ];
 
 export default function Tienda() {
-  const [carrito, setCarrito] = useState<number>(0);
   const [menuAbierto, setMenuAbierto] = useState<boolean>(false);
   const [scrolled, setScrolled] = useState(false);
   
-  // --- ESTADOS ---
+  // --- 🛒 ESTADO DEL CARRITO ---
+  const [carrito, setCarrito] = useState<any[]>([]); // Lista de productos
+  const [carritoAbierto, setCarritoAbierto] = useState(false); // Abrir/Cerrar panel
+
+  // --- ESTADOS DE CONTENIDO ---
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeSection, setActiveSection] = useState("");
-  
   const [banners, setBanners] = useState<any[]>(BANNERS_BACKUP); 
   const [productosReales, setProductosReales] = useState<any[]>([]);
   const [productosFiltrados, setProductosFiltrados] = useState<any[]>([]);
@@ -109,30 +110,28 @@ export default function Tienda() {
   const [filtroActivo, setFiltroActivo] = useState("Todos");
   const [busqueda, setBusqueda] = useState(""); 
 
-  // --- CARGAR DATOS DE SANITY ---
+  // --- CARGA DE DATOS ---
   useEffect(() => {
     const fetchData = async () => {
       try {
         const bannerQuery = `*[_type == "banner"]`;
         const bannerData = await client.fetch(bannerQuery);
-        // Combinamos Sanity + Backup
         setBanners([...bannerData, ...BANNERS_BACKUP]);
 
         const productQuery = `*[_type == "producto"] | order(_createdAt desc)`;
         const productData = await client.fetch(productQuery);
         setProductosReales(productData);
         setProductosFiltrados(productData);
-        
         setLoading(false);
       } catch (error) {
-        console.error("Error cargando datos:", error);
+        console.error("Error:", error);
         setLoading(false);
       }
     };
     fetchData();
   }, []);
 
-  // 🧠 CEREBRO DE FILTRADO
+  // --- LÓGICA DE FILTRADO ---
   useEffect(() => {
     let resultado = productosReales;
     if (filtroActivo !== "Todos") {
@@ -168,7 +167,6 @@ export default function Tienda() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Rotación del Slider
   useEffect(() => {
     if (banners.length <= 1) return;
     const interval = setInterval(() => {
@@ -177,21 +175,43 @@ export default function Tienda() {
     return () => clearInterval(interval);
   }, [banners]);
 
-  const comprarPorWhatsApp = (producto: any) => {
-    const mensaje = `Hola D'Carito, vi este producto en la web: *${producto.nombre}* a S/ ${producto.precio}. ¿Tienen stock?`;
+  // --- 🛒 LÓGICA DEL CARRITO ---
+  const agregarAlCarrito = (producto: any) => {
+    // Añadimos el producto al array
+    setCarrito([...carrito, producto]);
+    // Abrimos el panel para feedback visual
+    setCarritoAbierto(true);
+  };
+
+  const eliminarDelCarrito = (index: number) => {
+    const nuevoCarrito = [...carrito];
+    nuevoCarrito.splice(index, 1);
+    setCarrito(nuevoCarrito);
+  };
+
+  const calcularTotal = () => {
+    return carrito.reduce((total, item) => total + item.precio, 0);
+  };
+
+  const checkoutWhatsApp = () => {
+    if (carrito.length === 0) return;
+
+    // Construir mensaje lista
+    let mensaje = "Hola D'Carito! Quiero hacer el siguiente pedido:\n\n";
+    carrito.forEach((item, index) => {
+      mensaje += `• ${item.nombre} - S/${item.precio}\n`;
+    });
+    mensaje += `\n*TOTAL: S/ ${calcularTotal()}*\n\n¿Me envían el QR de pago?`;
+
     const url = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
   };
 
   const MARQUEE_TEXT = "🚚 ENVÍOS GRATIS A TODO EL PERÚ • 💳 ACEPTAMOS YAPE Y PLIN • 🎁 REGALO POR COMPRAS > S/199 • ⚡ ENVÍO EXPRESS EN LIMA • ";
 
-  // --- LÓGICA HÍBRIDA PARA IMAGEN ---
   const getBannerImage = (slide: any) => {
-    if (slide.imagen) {
-      return urlFor(slide.imagen).url(); // Imagen de Sanity
-    } else if (slide.imgBackup) {
-      return slide.imgBackup; // Imagen de Backup
-    }
+    if (slide.imagen) return urlFor(slide.imagen).url();
+    if (slide.imgBackup) return slide.imgBackup;
     return null; 
   };
 
@@ -199,15 +219,64 @@ export default function Tienda() {
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900 selection:bg-rose-100 selection:text-rose-900">
       <style jsx global>{`
         html { scroll-behavior: smooth; }
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-          display: inline-flex;
-          animation: marquee 20s linear infinite;
-        }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .animate-marquee { display: inline-flex; animation: marquee 20s linear infinite; }
       `}</style>
+
+      {/* --- PANEL LATERAL DEL CARRITO (DRAWER) --- */}
+      {carritoAbierto && (
+        <div className="fixed inset-0 z-[60] flex justify-end">
+          {/* Fondo oscuro backdrop */}
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setCarritoAbierto(false)}></div>
+          
+          {/* El carrito en sí */}
+          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+            <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h2 className="text-xl font-black flex items-center gap-2">🛒 Tu Bolsa <span className="text-rose-600">({carrito.length})</span></h2>
+              <button onClick={() => setCarritoAbierto(false)} className="p-2 hover:bg-gray-200 rounded-full">✕</button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              {carrito.length === 0 ? (
+                <div className="text-center py-20 opacity-50">
+                  <p className="text-4xl mb-4">🛍️</p>
+                  <p>Tu carrito está vacío.</p>
+                  <button onClick={() => setCarritoAbierto(false)} className="mt-4 text-rose-600 font-bold hover:underline">Ir a comprar</button>
+                </div>
+              ) : (
+                carrito.map((item, i) => (
+                  <div key={i} className="flex gap-4 items-center bg-white border border-gray-100 p-3 rounded-xl shadow-sm">
+                    <div className="h-16 w-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                      {item.imagen && <img src={urlFor(item.imagen).width(100).url()} className="h-full w-full object-cover" />}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-sm line-clamp-1">{item.nombre}</h4>
+                      <p className="text-xs text-gray-500">{item.categoria}</p>
+                      <p className="font-bold text-rose-600 mt-1">S/ {item.precio}</p>
+                    </div>
+                    <button onClick={() => eliminarDelCarrito(i)} className="text-gray-300 hover:text-red-500 p-2">🗑️</button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-100 bg-gray-50">
+              <div className="flex justify-between items-center mb-4 text-lg font-bold">
+                <span>Total a Pagar:</span>
+                <span>S/ {calcularTotal()}</span>
+              </div>
+              <button 
+                onClick={checkoutWhatsApp}
+                disabled={carrito.length === 0}
+                className="w-full bg-green-500 text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-green-600 transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-lg shadow-green-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592z"/></svg>
+                Pedir por WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 1. CINTA MARQUESINA */}
       <div className="bg-black text-white overflow-hidden py-2.5 relative z-50">
@@ -223,7 +292,7 @@ export default function Tienda() {
       <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 shadow-sm backdrop-blur-md py-2' : 'bg-white py-4'}`}>
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 md:px-6">
           <div className="text-xl md:text-2xl font-black tracking-tighter cursor-pointer" onClick={() => window.scrollTo(0,0)}>
-            D'Carito<span className="text-rose-600">.pe</span>
+            D'Carito<span className="text-rose-600">.PE</span>
           </div>
           <div className="hidden space-x-8 text-sm font-medium md:flex text-gray-600">
             {NAV_LINKS.map((item) => (
@@ -234,8 +303,9 @@ export default function Tienda() {
             ))}
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative group rounded-full p-2 transition hover:bg-gray-100">
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-600 text-[10px] font-bold text-white group-hover:scale-110 transition">{carrito}</span>
+            {/* 🛒 BOTÓN DEL CARRITO AHORA ES FUNCIONAL */}
+            <button onClick={() => setCarritoAbierto(true)} className="relative group rounded-full p-2 transition hover:bg-gray-100">
+              <span className={`absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white group-hover:scale-110 transition ${carrito.length > 0 ? 'bg-rose-600' : 'bg-gray-400'}`}>{carrito.length}</span>
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
             </button>
             <button className="block md:hidden p-2 text-gray-800" onClick={() => setMenuAbierto(!menuAbierto)}>
@@ -252,8 +322,7 @@ export default function Tienda() {
         )}
       </nav>
 
-      {/* 3. HERO SLIDER (HÍBRIDO + OPTIMIZADO PARA MÓVIL) */}
-      {/* ⚠️ CAMBIO AQUÍ: h-[50vh] en móvil para reducir el zoom */}
+      {/* 3. HERO SLIDER */}
       <div className="relative h-[50vh] md:h-[85vh] w-full bg-gray-900 overflow-hidden">
         {banners.map((slide, index) => {
           const imgSrc = getBannerImage(slide);
@@ -261,7 +330,6 @@ export default function Tienda() {
             <div key={slide._id} className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10"></div>
               {imgSrc ? (
-                // ⚠️ CAMBIO AQUÍ: object-center en lugar de object-top
                 <img src={imgSrc} alt={slide.titulo} className={`h-full w-full object-cover object-center transition-transform duration-[5s] ${index === currentSlide ? 'scale-110' : 'scale-100'}`} />
               ) : (
                 <div className="h-full w-full bg-gray-800"></div>
@@ -269,7 +337,6 @@ export default function Tienda() {
             </div>
           );
         })}
-        
         <div className="absolute inset-0 z-20 flex flex-col justify-center px-6 md:px-24">
           <div className="max-w-xl">
             <div key={currentSlide} className="animate-in slide-in-from-bottom-10 fade-in duration-700">
@@ -279,7 +346,6 @@ export default function Tienda() {
               <h1 className="text-4xl md:text-8xl font-black text-white leading-[0.9] drop-shadow-2xl mb-6">
                 {banners[currentSlide]?.titulo || "D'CARITO"}
               </h1>
-              {/* Ocultamos descripción en móvil muy pequeño para que no tape la foto */}
               <p className="text-sm md:text-xl text-gray-200 font-light mb-8 max-w-md border-l-2 border-white/30 pl-4 hidden md:block">
                 {banners[currentSlide]?.descripcion}
               </p>
@@ -292,8 +358,6 @@ export default function Tienda() {
             </div>
           </div>
         </div>
-
-        {/* Navegación Lateral */}
         {banners.length > 1 && (
           <div className="absolute bottom-4 right-4 md:bottom-8 md:right-6 md:top-1/2 md:-translate-y-1/2 md:right-12 z-30 flex md:flex-col gap-4">
             {banners.map((slide, index) => (
@@ -331,7 +395,7 @@ export default function Tienda() {
         </div>
       </section>
 
-      {/* 5. CATÁLOGO CON BUSCADOR Y TABS */}
+      {/* 5. CATÁLOGO */}
       <main id="coleccion" className="scroll-mt-32 mx-auto max-w-7xl px-4 md:px-6 pb-40 min-h-[800px]">
         <div className="flex flex-col gap-6 mb-12 border-b border-gray-100 pb-8">
           <div className="flex flex-col md:flex-row justify-between items-end gap-6">
@@ -380,8 +444,9 @@ export default function Tienda() {
                       <div className="h-full w-full flex items-center justify-center bg-gray-100 text-gray-300 text-xs font-bold uppercase tracking-widest">Sin Foto</div>
                     )}
                     <div className="hidden md:block absolute bottom-4 left-4 right-4 translate-y-full opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                      <button onClick={() => comprarPorWhatsApp(producto)} className="w-full rounded-xl bg-white/90 backdrop-blur-md py-3 text-sm font-bold text-black shadow-lg hover:bg-black hover:text-white transition-colors flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5z"/></svg> Lo quiero ya
+                      {/* 🔥 BOTÓN AGREGAR AL CARRITO (DESKTOP) */}
+                      <button onClick={() => agregarAlCarrito(producto)} className="w-full rounded-xl bg-white/90 backdrop-blur-md py-3 text-sm font-bold text-black shadow-lg hover:bg-black hover:text-white transition-colors flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5z"/></svg> Agregar
                       </button>
                     </div>
                   </div>
@@ -389,12 +454,13 @@ export default function Tienda() {
                     <div className="flex justify-between items-center mb-1">
                       <p className="text-[8px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{producto.categoria}</p>
                     </div>
-                    <h3 onClick={() => comprarPorWhatsApp(producto)} className="text-sm md:text-lg font-bold text-gray-900 leading-tight group-hover:text-rose-600 transition-colors cursor-pointer line-clamp-2">{producto.nombre}</h3>
+                    <h3 className="text-sm md:text-lg font-bold text-gray-900 leading-tight group-hover:text-rose-600 transition-colors cursor-pointer line-clamp-2">{producto.nombre}</h3>
                     <div className="mt-1 md:mt-2 flex items-center gap-2 md:gap-3 flex-wrap">
                       <span className="text-lg md:text-2xl font-black text-gray-900">S/ {producto.precio}</span>
                       {producto.antes && <span className="text-xs md:text-sm text-gray-400 line-through">S/ {producto.antes}</span>}
                     </div>
-                    <button onClick={() => comprarPorWhatsApp(producto)} className="md:hidden mt-2 w-full bg-black text-white text-xs font-bold py-2 rounded-lg">Comprar</button>
+                    {/* 🔥 BOTÓN AGREGAR (MÓVIL) */}
+                    <button onClick={() => agregarAlCarrito(producto)} className="md:hidden mt-2 w-full bg-black text-white text-xs font-bold py-2 rounded-lg">Agregar +</button>
                   </div>
                 </div>
               ))
