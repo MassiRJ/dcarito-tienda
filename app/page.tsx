@@ -52,8 +52,9 @@ const TESTIMONIOS = [
 ];
 
 const NAV_LINKS = [
-  { name: "Catálogo", href: "#coleccion" },
+  
   { name: "Categorías", href: "#categorias" },
+  { name: "Catálogo", href: "#coleccion" },
   { name: "Clientes", href: "#testimonios" },
   { name: "Contacto", href: "#contacto" },
 ];
@@ -292,7 +293,7 @@ export default function Tienda() {
       <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 shadow-sm backdrop-blur-md py-2' : 'bg-white py-4'}`}>
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 md:px-6">
           <div className="text-xl md:text-2xl font-black tracking-tighter cursor-pointer" onClick={() => window.scrollTo(0,0)}>
-            D'Carito<span className="text-rose-600">.PE</span>
+            D'Carito<span className="text-rose-600">.pe</span>
           </div>
           <div className="hidden space-x-8 text-sm font-medium md:flex text-gray-600">
             {NAV_LINKS.map((item) => (
