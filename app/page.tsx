@@ -60,7 +60,7 @@ const NAV_LINKS = [
 ];
 
 const TABS_FILTROS = ["Todos", "Brasieres", "Calzones", "Fajas", "Pijamas"];
-const NUMERO_WHATSAPP = "51932916897"; 
+const NUMERO_WHATSAPP = "51916932897"; 
 
 // --- 🔥 BANNERS ORIGINALES DE RESPALDO ---
 const BANNERS_BACKUP = [
